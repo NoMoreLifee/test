@@ -523,6 +523,23 @@
                 margin: 10px 0;
             }
         }
+        .filter-container {
+    margin-bottom: 15px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.filter-container .form-group {
+    width: 100%;
+    max-width: 300px;
+}
+
+@media (max-width: 768px) {
+    .filter-container .form-group {
+        max-width: 100%;
+    }
+}
     </style>
 </head>
 <body>
@@ -557,6 +574,27 @@
                         <button class="btn btn-warning" onclick="resetSearch()">
                             <i class="fas fa-redo"></i> إعادة تعيين
                         </button>
+                    </div>
+                    
+                    <div class="filter-container no-print" style="margin-top: 15px;">
+                        <div class="form-group">
+                            <label for="filterMonth">فلترة حسب شهر الدفع:</label>
+                            <select id="filterMonth" onchange="filterByMonth()">
+                                <option value="0">عرض الكل</option>
+                                <option value="1">يناير</option>
+                                <option value="2">فبراير</option>
+                                <option value="3">مارس</option>
+                                <option value="4">أبريل</option>
+                                <option value="5">مايو</option>
+                                <option value="6">يونيو</option>
+                                <option value="7">يوليو</option>
+                                <option value="8">أغسطس</option>
+                                <option value="9">سبتمبر</option>
+                                <option value="10">أكتوبر</option>
+                                <option value="11">نوفمبر</option>
+                                <option value="12">ديسمبر</option>
+                            </select>
+                        </div>
                     </div>
                     
                     <div class="table-responsive">
@@ -696,6 +734,33 @@
     </template>
 
     <script>
+function filterByMonth() {
+    const selectedMonth = parseInt(document.getElementById('filterMonth').value);
+    
+    if (selectedMonth === 0) {
+        displayClients();
+        return;
+    }
+    
+    const filteredClients = clients.filter(client => {
+        const paymentDate = new Date(client.paymentDate);
+        return (paymentDate.getMonth() + 1) === selectedMonth;
+    });
+    
+    displayClients(filteredClients);
+}
+
+
+function getArabicMonthName(monthNumber) {
+    const months = [
+        "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
+        "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
+    ];
+    return months[monthNumber - 1] || "";
+}
+
+
+
         let clients = JSON.parse(localStorage.getItem('clients')) || [];
         
         document.addEventListener('DOMContentLoaded', function() {
@@ -888,23 +953,31 @@
         }
         
 
-function searchClients() {
+        function searchClients() {
     const searchTerm = document.getElementById('search').value.trim().toLowerCase();
+    const selectedMonth = parseInt(document.getElementById('filterMonth').value);
     
-    if (!searchTerm) {
-        displayClients();
-        return;
+    let filteredClients = clients;
+    
+    if (selectedMonth > 0) {
+        filteredClients = filteredClients.filter(client => {
+            const renewalDate = new Date(client.renewalDate);
+            return (renewalDate.getMonth() + 1) === selectedMonth;
+        });
     }
     
-    const filteredClients = clients.filter(client => 
-        client.name.toLowerCase().includes(searchTerm)
-    );
+    if (searchTerm) {
+        filteredClients = filteredClients.filter(client => 
+            client.name.toLowerCase().includes(searchTerm)
+        );
+    }
     
     displayClients(filteredClients);
 }
 
 function resetSearch() {
     document.getElementById('search').value = '';
+    document.getElementById('filterMonth').value = '0';
     displayClients();
 }
 
