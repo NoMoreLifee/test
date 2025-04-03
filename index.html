@@ -142,7 +142,7 @@
             font-size: 0.9rem;
         }
         
-        input, select {
+        input, select, textarea {
             width: 100%;
             padding: 10px;
             border: 1px solid var(--border-color);
@@ -152,7 +152,7 @@
             background-color: #fff;
         }
         
-        input:focus, select:focus {
+        input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: var(--primary-light);
             box-shadow: 0 0 0 3px rgba(94, 114, 228, 0.1);
@@ -524,28 +524,117 @@
             }
         }
         .filter-container {
-    margin-bottom: 15px;
-    padding: 15px;
-    background-color: #f8f9fa;
-    border-radius: 8px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .filter-container .form-group {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        @media (max-width: 768px) {
+            .filter-container .form-group {
+                max-width: 100%;
+            }
+        }
+        
+        /* أنماط الصفحة الجديدة لإضافة عملاء متعددين */
+        .bulk-add-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .bulk-instructions {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-right: 4px solid var(--primary-color);
+        }
+        
+        .bulk-instructions h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        
+        .bulk-instructions ol {
+            padding-right: 20px;
+        }
+        
+        .bulk-instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .bulk-textarea {
+            min-height: 200px;
+            font-family: monospace;
+        }
+        
+        .bulk-preview {
+            margin-top: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .bulk-preview h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        
+        .bulk-preview-table {
+            width: 100%;
+            font-size: 0.85rem;
+        }
+        
+        .bulk-preview-table th {
+            background-color: #f1f3f5;
+            padding: 8px;
+        }
+        
+        .bulk-preview-table td {
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .bulk-errors {
+            color: var(--danger-color);
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .bulk-success {
+            color: var(--success-color);
+            font-weight: 600;
+            margin-top: 15px;
+        }
+
+        .btn-info {
+    background-color: #11cdef;
+    color: white;
 }
 
-.filter-container .form-group {
-    width: 100%;
-    max-width: 300px;
+.btn-info:hover {
+    background-color: #0da5c0;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px var(--shadow-strong);
 }
 
-@media (max-width: 768px) {
-    .filter-container .form-group {
-        max-width: 100%;
-    }
+.btn-warning {
+    background-color: var(--warning-color);
+    color: white;
 }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="app-header">
-            <h1>Malek Al Sayyah</h1>
+            <h1>Headshot Network</h1>
         </div>
         
         <div class="app-content">
@@ -555,6 +644,9 @@
                 </div>
                 <div class="tab" data-tab="add-client">
                     <i class="fas fa-user-plus"></i> إضافة عميل جديد
+                </div>
+                <div class="tab" data-tab="bulk-add">
+                    <i class="fas fa-users-cog"></i> إضافة عملاء متعددين
                 </div>
                 <div class="tab" data-tab="invoices">
                     <i class="fas fa-file-invoice"></i> الفواتير
@@ -642,6 +734,71 @@
                 </div>
             </div>
             
+            <div id="bulk-add" class="tab-content">
+                <div class="card bulk-add-container">
+                    <h2><i class="fas fa-users-cog"></i> إضافة عملاء متعددين</h2>
+                    
+                    <div class="bulk-instructions">
+                        <h3><i class="fas fa-info-circle"></i> التعليمات:</h3>
+                        <ol>
+                            <li>أدخل بيانات العملاء في المربع أدناه، كل عميل في سطر منفصل.</li>
+                            <li>يجب أن تكون البيانات بالصيغة التالية: <strong>اسم العميل, المبلغ, تاريخ الدفع (YYYY-MM-DD), تاريخ التجديد (YYYY-MM-DD)</strong></li>
+                            <li>مثال: <code>صالح صالح, 100, 2023-06-15, 2023-07-15</code></li>
+                            <li>يمكنك نسخ البيانات من إكسل أو أي ملف نصي آخر.</li>
+                            <li>اضغط على "معاينة" لفحص البيانات قبل الإضافة.</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="bulkData">بيانات العملاء:</label>
+                        <textarea id="bulkData" class="bulk-textarea" placeholder="أدخل بيانات العملاء هنا، كل عميل في سطر منفصل"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="defaultAmount">المبلغ الافتراضي (إذا لم يتم تحديده):</label>
+                        <input type="number" id="defaultAmount" placeholder="المبلغ الافتراضي للعملاء">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="defaultDuration">مدة الاشتراك الافتراضية (بالأيام):</label>
+                        <input type="number" id="defaultDuration" value="30" placeholder="عدد أيام الاشتراك">
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button class="btn btn-primary" onclick="previewBulkData()">
+                            <i class="fas fa-eye"></i> معاينة
+                        </button>
+                        <button class="btn btn-success" onclick="addBulkClients()" id="addBulkBtn" disabled>
+                            <i class="fas fa-plus-circle"></i> إضافة العملاء
+                        </button>
+                        <button class="btn btn-warning" onclick="clearBulkData()">
+                            <i class="fas fa-trash"></i> مسح البيانات
+                        </button>
+                    </div>
+                    
+                    <div id="bulkPreview" class="bulk-preview" style="display: none;">
+                        <h4><i class="fas fa-list"></i> معاينة البيانات</h4>
+                        <div class="table-responsive">
+                            <table class="bulk-preview-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>اسم العميل</th>
+                                        <th>المبلغ</th>
+                                        <th>تاريخ الدفع</th>
+                                        <th>تاريخ التجديد</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bulkPreviewBody">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="bulkErrors" class="bulk-errors"></div>
+                        <div id="bulkSuccess" class="bulk-success"></div>
+                    </div>
+                </div>
+            </div>
+            
             <div id="invoices" class="tab-content">
                 <div id="invoicesList">
                     <div class="card">
@@ -721,8 +878,11 @@
                 </table>
             </div>
             <div class="invoice-footer">
-                <p><i class="fas fa-heart"></i>By Malek Al Sayyah</p>
-                <p><i class="fas fa-phone"></i> للاستفسار يرجى التواصل عبر: +961 76 573 198</p>
+                <p><i class="fas fa-heart"></i>By wissam mohammad</p>
+                <p><i class="fas fa-phone"></i> للاستفسار يرجى التواصل عبر:</p>
+                <p>📞 +961 70 061 766</p>
+                <p>📞 +961 XX XXX XXX</p>
+                
                 <button class="btn btn-primary no-print" onclick="window.print()">
                     <i class="fas fa-print"></i> طباعة الفاتورة
                 </button>
@@ -734,32 +894,29 @@
     </template>
 
     <script>
-function filterByMonth() {
-    const selectedMonth = parseInt(document.getElementById('filterMonth').value);
-    
-    if (selectedMonth === 0) {
-        displayClients();
-        return;
-    }
-    
-    const filteredClients = clients.filter(client => {
-        const paymentDate = new Date(client.paymentDate);
-        return (paymentDate.getMonth() + 1) === selectedMonth;
-    });
-    
-    displayClients(filteredClients);
-}
+        function filterByMonth() {
+            const selectedMonth = parseInt(document.getElementById('filterMonth').value);
+            
+            if (selectedMonth === 0) {
+                displayClients();
+                return;
+            }
+            
+            const filteredClients = clients.filter(client => {
+                const paymentDate = new Date(client.paymentDate);
+                return (paymentDate.getMonth() + 1) === selectedMonth;
+            });
+            
+            displayClients(filteredClients);
+        }
 
-
-function getArabicMonthName(monthNumber) {
-    const months = [
-        "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
-        "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
-    ];
-    return months[monthNumber - 1] || "";
-}
-
-
+        function getArabicMonthName(monthNumber) {
+            const months = [
+                "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
+                "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
+            ];
+            return months[monthNumber - 1] || "";
+        }
 
         let clients = JSON.parse(localStorage.getItem('clients')) || [];
         
@@ -821,12 +978,13 @@ function getArabicMonthName(monthNumber) {
             }
             
             const client = {
-                id: Date.now(),
-                name: clientName,
-                amount: paymentAmount,
-                paymentDate: paymentDate,
-                renewalDate: renewalDate
-            };
+    id: Date.now(),
+    name: clientName,
+    amount: paymentAmount,
+    paymentDate: paymentDate,
+    renewalDate: renewalDate,
+    unpaidMonths: 0 
+};
             
             clients.push(client);
             saveClients();
@@ -839,55 +997,74 @@ function getArabicMonthName(monthNumber) {
         }
         
         function displayClients(clientsToDisplay = clients) {
-            const clientsList = document.getElementById('clientsList');
-            clientsList.innerHTML = '';
-            
-            if (clientsToDisplay.length === 0) {
-                clientsList.innerHTML = '<tr><td colspan="7" style="text-align: center;">لا يوجد عملاء مسجلين</td></tr>';
-                return;
-            }
-            
-            clientsToDisplay.forEach((client, index) => {
-                const row = document.createElement('tr');
-                
-                const paymentDate = new Date(client.paymentDate);
-                const renewalDate = new Date(client.renewalDate);
-                
-                const today = new Date();
-                const daysUntilRenewal = Math.ceil((renewalDate - today) / (1000 * 60 * 60 * 24));
-                
-                let statusBadge = '';
-                if (daysUntilRenewal <= 0) {
-                    statusBadge = '<span class="badge badge-danger">منتهي</span>';
-                } else if (daysUntilRenewal <= 7) {
-                    statusBadge = '<span class="badge badge-warning">قريب من الانتهاء</span>';
-                } else {
-                    statusBadge = '<span class="badge badge-success">نشط</span>';
-                }
-                
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${client.name}</td>
-                    <td>${client.amount}</td>
-                    <td>${formatDate(paymentDate)}</td>
-                    <td>${formatDate(renewalDate)}</td>
-                    <td>${statusBadge}</td>
-                    <td class="actions">
-                        <button class="btn btn-success" onclick="printInvoice(${client.id})">
-                            <i class="fas fa-print"></i>
-                        </button>
-                        <button class="btn btn-primary" onclick="editClient(${client.id})">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-danger" onclick="deleteClient(${client.id})">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </td>
-                `;
-                
-                clientsList.appendChild(row);
-            });
-        }
+    const clientsList = document.getElementById('clientsList');
+    clientsList.innerHTML = '';
+    
+    if (clientsToDisplay.length === 0) {
+        clientsList.innerHTML = '<tr><td colspan="7" style="text-align: center;">لا يوجد عملاء مسجلين</td></tr>';
+        return;
+    }
+    
+    clientsToDisplay.forEach((client, index) => {
+        const row = document.createElement('tr');
+        
+        const paymentDate = new Date(client.paymentDate);
+        const renewalDate = new Date(client.renewalDate);
+        
+        const statusInfo = getRenewalStatus(client.renewalDate, client.unpaidMonths || 0);
+        const statusBadge = `<span class="badge ${statusInfo.class}">${statusInfo.label}</span>`;
+        
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${client.name}</td>
+            <td>${client.amount}</td>
+            <td>${formatDate(paymentDate)}</td>
+            <td>${formatDate(renewalDate)}</td>
+            <td>${statusBadge}</td>
+            <td class="actions">
+                <button class="btn btn-success" onclick="printInvoice(${client.id})">
+                    <i class="fas fa-print"></i>
+                </button>
+                <button class="btn btn-primary" onclick="editClient(${client.id})">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-danger" onclick="deleteClient(${client.id})">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <button class="btn btn-warning" onclick="increaseUnpaidMonths(${client.id})" title="زيادة أشهر عدم الدفع">
+                    <i class="fas fa-plus"></i> (${client.unpaidMonths || 0})
+                </button>
+                <button class="btn btn-info" onclick="decreaseUnpaidMonths(${client.id})" title="إنقاص أشهر عدم الدفع">
+                    <i class="fas fa-minus"></i>
+                </button>
+            </td>
+        `;
+        
+        clientsList.appendChild(row);
+    });
+}
+
+        function increaseUnpaidMonths(clientId) {
+    const clientIndex = clients.findIndex(c => c.id === clientId);
+    if (clientIndex !== -1) {
+        clients[clientIndex].unpaidMonths = (clients[clientIndex].unpaidMonths || 0) + 1;
+        saveClients();
+        displayClients();
+        
+    }
+}
+
+function decreaseUnpaidMonths(clientId) {
+    const clientIndex = clients.findIndex(c => c.id === clientId);
+    if (clientIndex !== -1 && (clients[clientIndex].unpaidMonths || 0) > 0) {
+        clients[clientIndex].unpaidMonths = clients[clientIndex].unpaidMonths - 1;
+        saveClients();
+        displayClients();
+        
+    } else {
+        alert('لا يمكن إنقاص الأشهر أقل من الصفر');
+    }
+}
         
         function formatDate(date) {
             return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
@@ -939,12 +1116,13 @@ function getArabicMonthName(monthNumber) {
             
             if (clientIndex !== -1) {
                 clients[clientIndex] = {
-                    ...clients[clientIndex],
-                    name,
-                    amount,
-                    paymentDate,
-                    renewalDate
-                };
+    ...clients[clientIndex],
+    name,
+    amount,
+    paymentDate,
+    renewalDate,
+    unpaidMonths: clients[clientIndex].unpaidMonths || 0 
+};
                 
                 saveClients();
                 displayClients();
@@ -952,78 +1130,79 @@ function getArabicMonthName(monthNumber) {
             }
         }
         
-
         function searchClients() {
-    const searchTerm = document.getElementById('search').value.trim().toLowerCase();
-    const selectedMonth = parseInt(document.getElementById('filterMonth').value);
-    
-    let filteredClients = clients;
-    
-    if (selectedMonth > 0) {
-        filteredClients = filteredClients.filter(client => {
-            const renewalDate = new Date(client.renewalDate);
-            return (renewalDate.getMonth() + 1) === selectedMonth;
+            const searchTerm = document.getElementById('search').value.trim().toLowerCase();
+            const selectedMonth = parseInt(document.getElementById('filterMonth').value);
+            
+            let filteredClients = clients;
+            
+            if (selectedMonth > 0) {
+                filteredClients = filteredClients.filter(client => {
+                    const renewalDate = new Date(client.renewalDate);
+                    return (renewalDate.getMonth() + 1) === selectedMonth;
+                });
+            }
+            
+            if (searchTerm) {
+                filteredClients = filteredClients.filter(client => 
+                    client.name.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            displayClients(filteredClients);
+        }
+
+        function resetSearch() {
+            document.getElementById('search').value = '';
+            document.getElementById('filterMonth').value = '0';
+            displayClients();
+        }
+
+        function printInvoice(clientId) {
+            const client = clients.find(c => c.id === clientId);
+            
+            if (!client) return;
+            
+            const invoicesTab = document.getElementById('invoices');
+            const invoicesList = document.getElementById('invoicesList');
+            invoicesList.innerHTML = '';
+            
+            const invoiceTemplate = document.getElementById('invoiceTemplate');
+            const invoice = document.importNode(invoiceTemplate.content, true);
+            
+            invoice.querySelector('.invoice-number').textContent = client.id;
+            invoice.querySelector('.invoice-date').textContent = new Date().toLocaleDateString('ar-EG');
+            invoice.querySelector('.client-name').textContent = client.name;
+            invoice.querySelector('.payment-amount').textContent = client.amount;
+            invoice.querySelector('.payment-date').textContent = new Date(client.paymentDate).toLocaleDateString('ar-EG');
+            invoice.querySelector('.renewal-date').textContent = new Date(client.renewalDate).toLocaleDateString('ar-EG');
+            
+            invoicesList.appendChild(invoice);
+            
+            goToTab('invoices');
+        }
+
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('editClientModal');
+            if (event.target === modal) {
+                closeEditModal();
+            }
         });
-    }
-    
-    if (searchTerm) {
-        filteredClients = filteredClients.filter(client => 
-            client.name.toLowerCase().includes(searchTerm)
-        );
-    }
-    
-    displayClients(filteredClients);
-}
 
-function resetSearch() {
-    document.getElementById('search').value = '';
-    document.getElementById('filterMonth').value = '0';
-    displayClients();
-}
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeEditModal();
+            }
+        });
 
-function printInvoice(clientId) {
-    const client = clients.find(c => c.id === clientId);
-    
-    if (!client) return;
-    
-    const invoicesTab = document.getElementById('invoices');
-    const invoicesList = document.getElementById('invoicesList');
-    invoicesList.innerHTML = '';
-    
-    const invoiceTemplate = document.getElementById('invoiceTemplate');
-    const invoice = document.importNode(invoiceTemplate.content, true);
-    
-    invoice.querySelector('.invoice-number').textContent = client.id;
-    invoice.querySelector('.invoice-date').textContent = new Date().toLocaleDateString('ar-EG');
-    invoice.querySelector('.client-name').textContent = client.name;
-    invoice.querySelector('.payment-amount').textContent = client.amount;
-    invoice.querySelector('.payment-date').textContent = new Date(client.paymentDate).toLocaleDateString('ar-EG');
-    invoice.querySelector('.renewal-date').textContent = new Date(client.renewalDate).toLocaleDateString('ar-EG');
-    
-    invoicesList.appendChild(invoice);
-    
-    goToTab('invoices');
-}
-
-window.addEventListener('click', function(event) {
-    const modal = document.getElementById('editClientModal');
-    if (event.target === modal) {
-        closeEditModal();
-    }
-});
-
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') {
-        closeEditModal();
-    }
-});
-
-function getRenewalStatus(renewalDate) {
+        function getRenewalStatus(renewalDate, unpaidMonths = 0) {
     const today = new Date();
     const renewal = new Date(renewalDate);
     const daysUntilRenewal = Math.ceil((renewal - today) / (1000 * 60 * 60 * 24));
     
-    if (daysUntilRenewal <= 0) {
+    if (unpaidMonths > 0) {
+        return { status: 'debt', label: 'مديون', class: 'badge-danger' };
+    } else if (daysUntilRenewal <= 0) {
         return { status: 'expired', label: 'منتهي', class: 'badge-danger' };
     } else if (daysUntilRenewal <= 7) {
         return { status: 'warning', label: 'قريب من الانتهاء', class: 'badge-warning' };
@@ -1032,32 +1211,39 @@ function getRenewalStatus(renewalDate) {
     }
 }
 
+        function formatCurrency(amount) {
+            return parseFloat(amount).toLocaleString('ar-SA') + ' ريال';
+        }
 
-function formatCurrency(amount) {
-    return parseFloat(amount).toLocaleString('ar-SA') + ' ريال';
-}
+        setInterval(function() {
+            if (document.querySelector('.tab[data-tab="clients"]').classList.contains('active')) {
+                displayClients();
+            }
+        }, 60000); 
 
-
-setInterval(function() {
-    if (document.querySelector('.tab[data-tab="clients"]').classList.contains('active')) {
-        displayClients();
-    }
-}, 60000); 
-
-function checkForExpiringSubscriptions() {
+        function checkForExpiringSubscriptions() {
     const expiringClients = clients.filter(client => {
-        const status = getRenewalStatus(client.renewalDate);
-        return status.status === 'warning' || status.status === 'expired';
+        const status = getRenewalStatus(client.renewalDate, client.unpaidMonths || 0);
+        return status.status === 'warning' || status.status === 'expired' || status.status === 'debt';
     });
     
     if (expiringClients.length > 0) {
         let message = 'تنبيه: لديك اشتراكات ';
         
-        const expiredCount = expiringClients.filter(c => 
-            getRenewalStatus(c.renewalDate).status === 'expired'
+        const debtCount = expiringClients.filter(c => 
+            getRenewalStatus(c.renewalDate, c.unpaidMonths || 0).status === 'debt'
         ).length;
         
-        const warningCount = expiringClients.length - expiredCount;
+        const expiredCount = expiringClients.filter(c => 
+            getRenewalStatus(c.renewalDate, c.unpaidMonths || 0).status === 'expired'
+        ).length;
+        
+        const warningCount = expiringClients.length - expiredCount - debtCount;
+        
+        if (debtCount > 0) {
+            message += `مديونية (${debtCount})`;
+            if (expiredCount > 0 || warningCount > 0) message += ' و';
+        }
         
         if (expiredCount > 0) {
             message += `منتهية (${expiredCount})`;
@@ -1072,90 +1258,295 @@ function checkForExpiringSubscriptions() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    checkForExpiringSubscriptions();
-});
+        document.addEventListener('DOMContentLoaded', function() {
+            checkForExpiringSubscriptions();
+        });
 
-function exportClientData() {
-    const dataStr = JSON.stringify(clients, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    const exportFileDefaultName = 'clients-data.json';
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-}
+        function exportClientData() {
+            const dataStr = JSON.stringify(clients, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = 'clients-data.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
 
-function importClientData(event) {
-    const file = event.target.files[0];
-    
-    if (file) {
-        const reader = new FileReader();
-        
-        reader.onload = function(e) {
-            try {
-                const importedClients = JSON.parse(e.target.result);
+        function importClientData(event) {
+            const file = event.target.files[0];
+            
+            if (file) {
+                const reader = new FileReader();
                 
-                if (Array.isArray(importedClients)) {
-                    if (confirm(`هل تريد استيراد ${importedClients.length} عميل؟ سيتم استبدال البيانات الحالية.`)) {
-                        clients = importedClients;
-                        saveClients();
-                        displayClients();
-                        alert('تم استيراد البيانات بنجاح!');
+                reader.onload = function(e) {
+                    try {
+                        const importedClients = JSON.parse(e.target.result);
+                        
+                        if (Array.isArray(importedClients)) {
+                            if (confirm(`هل تريد استيراد ${importedClients.length} عميل؟ سيتم استبدال البيانات الحالية.`)) {
+                                clients = importedClients;
+                                saveClients();
+                                displayClients();
+                                alert('تم استيراد البيانات بنجاح!');
+                            }
+                        } else {
+                            alert('الملف الذي تم اختياره لا يحتوي على بيانات صالحة.');
+                        }
+                    } catch (error) {
+                        alert('حدث خطأ أثناء قراءة الملف. تأكد من أن الملف بتنسيق JSON صحيح.');
+                        console.error(error);
+                    }
+                };
+                
+                reader.readAsText(file);
+            }
+        }
+
+        function addBackupButtons() {
+            const clientsTab = document.querySelector('#clients .card');
+            
+            const backupContainer = document.createElement('div');
+            backupContainer.className = 'backup-container';
+            backupContainer.style.marginTop = '20px';
+            backupContainer.style.display = 'flex';
+            backupContainer.style.gap = '10px';
+            backupContainer.style.justifyContent = 'center';
+            
+            const exportButton = document.createElement('button');
+            exportButton.className = 'btn btn-primary';
+            exportButton.innerHTML = '<i class="fas fa-download"></i> تصدير البيانات';
+            exportButton.onclick = exportClientData;
+            
+            const importButton = document.createElement('button');
+            importButton.className = 'btn btn-warning';
+            importButton.innerHTML = '<i class="fas fa-upload"></i> استيراد البيانات';
+            importButton.onclick = function() {
+                fileInput.click();
+            };
+            
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = '.json';
+            fileInput.style.display = 'none';
+            fileInput.addEventListener('change', importClientData);
+            
+            backupContainer.appendChild(exportButton);
+            backupContainer.appendChild(importButton);
+            backupContainer.appendChild(fileInput);
+            
+            clientsTab.appendChild(backupContainer);
+        }
+
+        function previewBulkData() {
+            const bulkData = document.getElementById('bulkData').value.trim();
+            const defaultAmount = document.getElementById('defaultAmount').value;
+            const defaultDuration = parseInt(document.getElementById('defaultDuration').value) || 30;
+            
+            if (!bulkData) {
+                alert('يرجى إدخال بيانات العملاء أولاً');
+                return;
+            }
+            
+            const lines = bulkData.split('\n').filter(line => line.trim() !== '');
+            const previewBody = document.getElementById('bulkPreviewBody');
+            const errorsDiv = document.getElementById('bulkErrors');
+            const successDiv = document.getElementById('bulkSuccess');
+            const bulkPreview = document.getElementById('bulkPreview');
+            const addBulkBtn = document.getElementById('addBulkBtn');
+            
+            previewBody.innerHTML = '';
+            errorsDiv.innerHTML = '';
+            successDiv.innerHTML = '';
+            bulkPreview.style.display = 'block';
+            
+            let hasErrors = false;
+            let validClients = 0;
+            
+            lines.forEach((line, index) => {
+                const row = document.createElement('tr');
+                const parts = line.split(',').map(part => part.trim());
+                
+                let name = parts[0] || '';
+                let amount = parts[1] || defaultAmount || '';
+                let paymentDate = parts[2] || '';
+                let renewalDate = parts[3] || '';
+                
+                let errors = [];
+                
+                if (!name) {
+                    errors.push('اسم العميل مطلوب');
+                }
+                
+                if (!amount) {
+                    errors.push('المبلغ مطلوب');
+                } else if (isNaN(amount)) {
+                    errors.push('المبلغ يجب أن يكون رقمًا');
+                }
+                
+                let paymentDateObj;
+                if (paymentDate) {
+                    paymentDateObj = new Date(paymentDate);
+                    if (isNaN(paymentDateObj.getTime())) {
+                        errors.push('تاريخ الدفع غير صحيح');
                     }
                 } else {
-                    alert('الملف الذي تم اختياره لا يحتوي على بيانات صالحة.');
+                    paymentDateObj = new Date();
+                    paymentDate = formatDateForInput(paymentDateObj);
                 }
-            } catch (error) {
-                alert('حدث خطأ أثناء قراءة الملف. تأكد من أن الملف بتنسيق JSON صحيح.');
-                console.error(error);
+                
+                let renewalDateObj;
+                if (renewalDate) {
+                    renewalDateObj = new Date(renewalDate);
+                    if (isNaN(renewalDateObj.getTime())) {
+                        errors.push('تاريخ التجديد غير صحيح');
+                    }
+                } else if (paymentDateObj) {
+                    renewalDateObj = new Date(paymentDateObj);
+                    renewalDateObj.setDate(renewalDateObj.getDate() + defaultDuration);
+                    renewalDate = formatDateForInput(renewalDateObj);
+                } else {
+                    renewalDateObj = new Date();
+                    renewalDateObj.setDate(renewalDateObj.getDate() + defaultDuration);
+                    renewalDate = formatDateForInput(renewalDateObj);
+                }
+                
+                if (errors.length > 0) {
+                    hasErrors = true;
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td colspan="4" style="color: var(--danger-color);">
+                            <strong>خطأ:</strong> ${errors.join('، ')}
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">${line}</div>
+                        </td>
+                    `;
+                } else {
+                    validClients++;
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${name}</td>
+                        <td>${amount}</td>
+                        <td>${formatDateForDisplay(paymentDate)}</td>
+                        <td>${formatDateForDisplay(renewalDate)}</td>
+                    `;
+                }
+                
+                previewBody.appendChild(row);
+            });
+            
+            if (hasErrors) {
+                errorsDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> يوجد أخطاء في بعض البيانات. يرجى تصحيحها قبل الإضافة.';
+                addBulkBtn.disabled = true;
+            } else {
+                successDiv.innerHTML = `<i class="fas fa-check-circle"></i> جاهز للإضافة: ${validClients} عميل صالح`;
+                addBulkBtn.disabled = false;
             }
+        }
+        
+        function formatDateForInput(date) {
+            if (typeof date === 'string') {
+                return date;
+            }
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        function formatDateForDisplay(dateStr) {
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return dateStr;
+            
+            const day = date.getDate();
+            const month = date.getMonth() + 1;
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+        
+        function addBulkClients() {
+    const bulkData = document.getElementById('bulkData').value.trim();
+    const defaultAmount = document.getElementById('defaultAmount').value;
+    const defaultDuration = parseInt(document.getElementById('defaultDuration').value) || 30;
+    
+    if (!bulkData) {
+        alert('لا توجد بيانات لإضافتها');
+        return;
+    }
+    
+    const lines = bulkData.split('\n').filter(line => line.trim() !== '');
+    let addedCount = 0;
+    
+    lines.forEach(line => {
+        const parts = line.split(',').map(part => part.trim());
+        
+        let name = parts[0] || '';
+        let amount = parts[1] || defaultAmount || '';
+        let paymentDate = parts[2] || '';
+        let renewalDate = parts[3] || '';
+        
+        if (!name || !amount || isNaN(amount)) return;
+        
+        let paymentDateObj;
+        if (paymentDate) {
+            paymentDateObj = new Date(paymentDate);
+            if (isNaN(paymentDateObj.getTime())) {
+                paymentDateObj = new Date();
+            }
+        } else {
+            paymentDateObj = new Date();
+        }
+        
+        let renewalDateObj;
+        if (renewalDate) {
+            renewalDateObj = new Date(renewalDate);
+            if (isNaN(renewalDateObj.getTime())) {
+                renewalDateObj = new Date(paymentDateObj);
+                renewalDateObj.setDate(renewalDateObj.getDate() + defaultDuration);
+            }
+        } else {
+            renewalDateObj = new Date(paymentDateObj);
+            renewalDateObj.setDate(renewalDateObj.getDate() + defaultDuration);
+        }
+        
+        const client = {
+            id: Date.now() + Math.floor(Math.random() * 1000),
+            name: name,
+            amount: amount,
+            paymentDate: formatDateForInput(paymentDateObj),
+            renewalDate: formatDateForInput(renewalDateObj)
         };
         
-        reader.readAsText(file);
+        clients.push(client);
+        addedCount++;
+    });
+    
+    if (addedCount > 0) {
+        saveClients();
+        displayClients();
+        
+        document.getElementById('bulkSuccess').innerHTML = 
+            `<i class="fas fa-check-circle"></i> تمت إضافة ${addedCount} عميل بنجاح!`;
+        document.getElementById('addBulkBtn').disabled = true;
+        
+        setTimeout(() => {
+            document.getElementById('bulkData').value = '';
+            document.getElementById('bulkPreview').style.display = 'none';
+        }, 3000);
     }
 }
+        
+        function clearBulkData() {
+            if (confirm('هل تريد مسح جميع البيانات المدخلة؟')) {
+                document.getElementById('bulkData').value = '';
+                document.getElementById('bulkPreview').style.display = 'none';
+                document.getElementById('addBulkBtn').disabled = true;
+            }
+        }
 
-function addBackupButtons() {
-    const clientsTab = document.querySelector('#clients .card');
-    
-    const backupContainer = document.createElement('div');
-    backupContainer.className = 'backup-container';
-    backupContainer.style.marginTop = '20px';
-    backupContainer.style.display = 'flex';
-    backupContainer.style.gap = '10px';
-    backupContainer.style.justifyContent = 'center';
-    
-    const exportButton = document.createElement('button');
-    exportButton.className = 'btn btn-primary';
-    exportButton.innerHTML = '<i class="fas fa-download"></i> تصدير البيانات';
-    exportButton.onclick = exportClientData;
-    
-    const importButton = document.createElement('button');
-    importButton.className = 'btn btn-warning';
-    importButton.innerHTML = '<i class="fas fa-upload"></i> استيراد البيانات';
-    importButton.onclick = function() {
-        fileInput.click();
-    };
-    
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = '.json';
-    fileInput.style.display = 'none';
-    fileInput.addEventListener('change', importClientData);
-    
-    backupContainer.appendChild(exportButton);
-    backupContainer.appendChild(importButton);
-    backupContainer.appendChild(fileInput);
-    
-    clientsTab.appendChild(backupContainer);
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(addBackupButtons, 100);
-});
-</script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(addBackupButtons, 100);
+        });
+    </script>
 </body>
 </html>
